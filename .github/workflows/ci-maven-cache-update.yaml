@@ -77,11 +77,6 @@ jobs:
       - name: Tune Runner VM
         uses: ./.github/actions/tune-runner-vm
 
-      - name: Configure Gradle Enterprise
-        uses: ./.github/actions/gradle-enterprise
-        with:
-          token: ${{ secrets.GE_ACCESS_TOKEN }}
-
       - name: Detect changed files
         if: ${{ github.event_name != 'schedule' }}
         id:   changes
@@ -118,3 +113,5 @@ jobs:
         run: |
           # download dependencies, ignore errors
           mvn -B -fn -ntp ${{ matrix.mvn_arguments }} dependency:go-offline
+        env:
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}

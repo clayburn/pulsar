@@ -104,11 +104,6 @@ jobs:
       - name: Tune Runner VM
         uses: ./.github/actions/tune-runner-vm
 
-      - name: Configure Gradle Enterprise
-        uses: ./.github/actions/gradle-enterprise
-        with:
-          token: ${{ secrets.GE_ACCESS_TOKEN }}
-
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
         if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
@@ -137,10 +132,14 @@ jobs:
       - name: Build core-modules
         run: |
           mvn -B -T 1C -ntp -Pcore-modules,-main clean install -DskipTests -Dlicense.skip=true -Drat.skip=true
+        env:
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
 
       - name: Run unit test group BROKER_FLAKY
         run: |
           CHANGED_TESTS="${{ needs.preconditions.outputs.tests_files }}" ./build/run_unit_group.sh BROKER_FLAKY
+        env:
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
 
       - name: print JVM thread dumps when cancelled
         if: cancelled()

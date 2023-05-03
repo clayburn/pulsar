@@ -57,12 +57,6 @@ jobs:
       - name: Tune Runner VM
         uses: ./.github/actions/tune-runner-vm
 
-      - name: Configure Gradle Enterprise
-        if: ${{ matrix.branch == 'master' }}
-        uses: ./.github/actions/gradle-enterprise
-        with:
-          token: ${{ secrets.GE_ACCESS_TOKEN }}
-
       - name: Cache local Maven repository
         uses: actions/cache@v3
         timeout-minutes: 5
@@ -84,12 +78,18 @@ jobs:
 
       - name: run install by skip tests
         run: mvn -B -ntp clean install -DskipTests -Dspotbugs.skip=true  -Dlicense.skip=true -Dcheckstyle.skip=true -Drat.skip=true -DskipDocker=true
+        env:
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
 
       - name: run OWASP Dependency Check for distribution/server (-DfailBuildOnAnyVulnerability=true)
         run: mvn -B -ntp -Pmain,skip-all,skipDocker,owasp-dependency-check initialize verify -pl distribution/server -DfailBuildOnAnyVulnerability=true
+        env:
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
 
       - name: run OWASP Dependency Check for distribution/offloaders, distribution/io and pulsar-sql/presto-distribution
         run: mvn -B -ntp -Pmain,skip-all,skipDocker,owasp-dependency-check initialize verify -pl distribution/offloaders,distribution/io,pulsar-sql/presto-distribution
+        env:
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
 
       - name: Upload OWASP Dependency Check reports
         uses: actions/upload-artifact@v3
